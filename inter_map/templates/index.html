@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Interactive Maps Application{% endblock %}
+
+{% block content %}
+<div class="choices">
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search for a location...">
+        <button id="search-button">Search</button>
+    </div>
+    <div class="icon-selection-container">
+        Select an icon for the marker:
+        <select id="icon-selector">
+            <option value="default">Default</option>
+            <option value="cinema">Cinema</option>
+            <option value="education">Education</option>
+            <option value="health">Health</option>
+            <option value="hotel">Hotel</option>
+            <option value="museum">Museum</option>
+            <option value="park">Park</option>
+            <option value="religion">Religion</option>
+            <option value="food">Food</option>
+            <option value="shopping">Shopping</option>
+            <option value="transport">Public Transport</option>
+            <option value="cafe">café</option>
+        </select>
+    </div>
+
+    <button onclick="saveMapState()">Save Map</button>
+</div>
+
+<div id="map"></div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <div class="registration-container">
+        <form action="/register/" method="post">
+            {% csrf_token %}
+            <label for="username"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" name="username" id="username" required>
+
+            <label for="password1"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="password1" id="password1" required>
+
+            <label for="password2"><b>Repeat Password</b></label>
+            <input type="password" placeholder="Repeat Password" name="password2" id="password2" required>
+
+            <button type="submit" class="registerbtn">Register</button>
+        </form>
+    </div>
+
+    <div class="container-signin">
+        <p>Already have an account? <a href="/accounts/login/">Sign in</a>.</p>
+    </div>
+</body>
+</html>

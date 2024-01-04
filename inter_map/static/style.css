@@ -1,0 +1,14 @@
+#map {
+    height: 600px;
+    width: 100%;
+}
+
+.search-container {
+    text-align: center;
+    padding: 10px;
+}
+
+#search-input {
+    width: 300px;
+    padding: 8px;
+}
