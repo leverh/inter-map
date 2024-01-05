@@ -7,22 +7,25 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 
 # Create your views here.
 
-# ViewSet for MapState
 class MapStateViewSet(viewsets.ModelViewSet):
     serializer_class = MapStateSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # This will return map states for the logged-in user
         user = self.request.user
         return MapState.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        # This will save the map state for the logged-in user
-        serializer.save(user=self.request.user)
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            print("User not authenticated")
 
 # Simple view for the home page
 def home(request):

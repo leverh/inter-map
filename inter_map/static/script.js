@@ -27,23 +27,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
 
-    // Consolidated Function to add a marker to the map
+    // Function to add a marker to the map
     function addMarker(latlng, selectedIcon) {
         var description = prompt("Please enter a description for this location:", "");
         if (description) {
             var marker = L.marker(latlng, { icon: selectedIcon }).addTo(map);
             marker.bindPopup(description);
-
-            // Save marker data
-        markersData.push({ 
-            latlng: { lat: latlng.lat, lng: latlng.lng }, 
-            icon: selectedIcon.options.iconUrl, 
-            description: description 
-        });
-    } else {
+            markersData.push({ 
+                latlng: { lat: latlng.lat, lng: latlng.lng }, 
+                icon: selectedIcon.options.iconUrl, 
+                description: description 
+            });
+        } else {
             alert("You must enter a description to add a marker.");
         }
     }
+// Check if 'icon-selector' exists and then add click event
+var iconSelector = document.getElementById('icon-selector');
+if (iconSelector) {
+    map.on('click', function(e) {
+        var selectedIconValue = iconSelector.value;
+        var selectedIcon = icons[selectedIconValue] || icons['default'];
+        addMarker(e.latlng, selectedIcon);
+    });
+}
+
+// Check if 'search-button' and 'search-input' exist and then add search functionality
+var searchButton = document.getElementById('search-button');
+var searchInput = document.getElementById('search-input');
+if (searchButton && searchInput) {
+    searchButton.addEventListener('click', function() {
+        var input = searchInput.value;
+        if (input) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    var location = data[0];
+                    map.setView([location.lat, location.lon], 13);
+                } else {
+                    console.log('Location not found');
+                }
+            })
+            .catch(error => console.log('Error:', error));
+        }
+    });
+}
 
     // Click event to add a marker
     map.on('click', function(e) {
@@ -71,35 +100,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+function getCSRFToken() {
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    return csrfTokenMeta ? csrfTokenMeta.content : null;
 }
 
-const csrftoken = getCookie('csrftoken');
+const csrftoken = getCSRFToken();
+
 
 
 // Function to save map state
 function saveMapState() {
+    // Define the data object
+    let data = {
+        name: "My Custom Map", 
+        data: markersData, 
+    };
+
     fetch('http://localhost:8000/api/mapstates/', {
         method: 'POST',
-        credentials: 'include',
         headers: {
-            'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
+            'X-CSRFToken': csrftoken,
         },
-        body: JSON.stringify({ name: 'My Custom Map', data: markersData })
+        credentials: 'include',
+        body: JSON.stringify(data), // Send the data object as JSON
     })
     .then(response => {
         if (!response.ok) {
@@ -107,10 +132,13 @@ function saveMapState() {
         }
         return response.json();
     })
-    .then(data => console.log('Map state saved:', data))
-    .catch(error => console.error('Error:', error));
+    .then(data => {
+        console.log('Map state saved:', data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
-
 
 
 function loadMapState(mapStateId) {
